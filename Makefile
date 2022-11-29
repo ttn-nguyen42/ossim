@@ -6,7 +6,7 @@ SRC = src
 OBJ = obj
 INCLUDE = include
 
-CC = gcc
+CC = g++
 DEBUG = -g -fsanitize=undefined,address
 CFLAGS = -std=c++20 -Wall -c $(DEBUG)
 LFLAGS = -Wall $(DEBUG)
@@ -18,8 +18,8 @@ MAKE = $(CC) $(INC)
 
 # Object files needed by modules
 MEM_OBJ = $(addprefix $(OBJ)/, paging.o mem.o cpu.o loader.o)
-OS_OBJ = $(addprefix $(OBJ)/, mem.o cpu.o loader.o queue.o os.o sched.o timer.o)
-SCHED_OBJ = $(addprefix $(OBJ)/, cpu.o loader.o mem.o queue.o os.o sched.o timer.o)
+OS_OBJ = $(addprefix $(OBJ)/, mem.o cpu.o loader.o queue.o os.o schedu.o timer.o)
+SCHED_OBJ = $(addprefix $(OBJ)/, cpu.o loader.o mem.o queue.o os.o schedu.o timer.o)
 HEADER = $(wildcard $(INCLUDE)/*.h)
 
 all: mem sched os 
@@ -30,7 +30,7 @@ mem: $(MEM_OBJ)
 
 # Just compile scheduler
 sched: $(SCHED_OBJ)
-	$(MAKE) $(LFLAGS) $(SCHED_OBJ) -o os $(LIB)
+	$(MAKE) $(LFLAGS) $(SCHED_OBJ) -o sched $(LIB)
 
 # Compile the whole OS simulation
 os: $(OS_OBJ)

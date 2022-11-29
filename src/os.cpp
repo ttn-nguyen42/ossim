@@ -1,7 +1,7 @@
 
 #include "cpu.h"
 #include "timer.h"
-#include "scheduler.h"
+#include "schedu.h"
 #include "loader.h"
 
 #define MLQ_SCHED

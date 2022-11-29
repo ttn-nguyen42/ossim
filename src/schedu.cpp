@@ -1,4 +1,4 @@
-#include "scheduler.h"
+#include "schedu.h"
 
 bool mlq_scheduler_t::is_empty() {
     for (int i = 0; i < MAX_PRIO; i += 1) {

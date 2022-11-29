@@ -6,6 +6,8 @@
 
 #include <pthread.h>
 #include <cstdint>
+#include <cstdio>
+#include <cstdlib>
 
 struct timer_id_t {
 	int done;
