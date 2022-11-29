@@ -1,7 +1,5 @@
 
 #include "timer.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 static pthread_t _timer;
 

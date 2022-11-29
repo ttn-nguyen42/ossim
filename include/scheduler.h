@@ -1,8 +1,8 @@
-#ifndef SCHED_H
-#define SCHED_H
+#pragma once
 
-#include <mutex>
-#include <vector>
+#ifndef SCHEDULER_H
+#define SCHEDULER_H
+
 #include "queue.h"
 
 #define MAX_PRIO 5

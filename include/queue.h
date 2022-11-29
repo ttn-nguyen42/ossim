@@ -1,9 +1,9 @@
+#pragma once
+
 #ifndef QUEUE_H
 #define QUEUE_H
 
 #include "common.h"
-#include <queue>
-#include <memory>
 
 #define MAX_QUEUE_SIZE 10
 

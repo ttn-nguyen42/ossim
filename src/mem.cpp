@@ -1,9 +1,5 @@
 
 #include "mem.h"
-#include <cstdlib>
-#include <cstring>
-#include <pthread.h>
-#include <cstdio>
 
 /* Search for page table table from the a segment table */
 static struct trans_table_t *get_trans_table(

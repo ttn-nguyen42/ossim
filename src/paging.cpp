@@ -2,8 +2,6 @@
 #include "mem.h"
 #include "cpu.h"
 #include "loader.h"
-#include <cstdio>
-#include <cstdlib>
 
 extern memory_t g_Memory;
 

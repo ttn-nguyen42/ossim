@@ -1,9 +1,5 @@
 
 #include "loader.h"
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <fstream>
 
 static uint32_t avail_pid = 1;
 
@@ -13,7 +9,8 @@ static uint32_t avail_pid = 1;
 #define OPT_READ        "read"
 #define OPT_WRITE       "write"
 
-static enum ins_opcode_t get_opcode(char *opt) {
+static enum ins_opcode_t get_opcode(const std::string& subj) {
+    const char* opt = subj.c_str();
     if (!strcmp(opt, OPT_CALC)) {
         return CALC;
     } else if (!strcmp(opt, OPT_ALLOC)) {
@@ -36,12 +33,12 @@ std::shared_ptr<pcb_t> load(const char *path) {
         printf("Process descriptor not found: %s\n", path);
         exit(1);
     }
-    char* opcode = (char*)"";
+    std::string opcode;
     int code_size, priority = 0;
     descriptor >> priority >> code_size;
     avail_pid += 1;
     std::shared_ptr<pcb_t> proc = std::make_shared<pcb_t>(avail_pid, priority, code_size);
-    for (inst_t& it : proc->code.text) {
+    for (inst_t &it: proc->code.text) {
         descriptor >> opcode;
         it.opcode = get_opcode(opcode);
         switch (it.opcode) {
@@ -59,12 +56,11 @@ std::shared_ptr<pcb_t> load(const char *path) {
                 descriptor >> it.arg_0 >> it.arg_1 >> it.arg_2;
                 break;
             default:
-                printf("Invalid opcode: %s\n", opcode);
+                printf("Invalid opcode: %s\n", opcode.c_str());
                 exit(1);
         }
     }
-
-
+    return proc;
 }
 
 

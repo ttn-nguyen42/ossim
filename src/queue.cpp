@@ -1,4 +1,3 @@
-#include <cstdio>
 #include "queue.h"
 
 void queue_t::enqueue(const std::shared_ptr<pcb_t>& proc) {

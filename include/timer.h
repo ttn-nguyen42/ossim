@@ -1,8 +1,11 @@
+#pragma once
+
 #ifndef TIMER_H
+
 #define TIMER_H
 
 #include <pthread.h>
-#include <stdint.h>
+#include <cstdint>
 
 struct timer_id_t {
 	int done;

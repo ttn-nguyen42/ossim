@@ -7,8 +7,8 @@ OBJ = obj
 INCLUDE = include
 
 CC = gcc
-DEBUG = -g
-CFLAGS = -std=c++17 -Wall -c $(DEBUG)
+DEBUG = -g -fsanitize=undefined,address
+CFLAGS = -std=c++20 -Wall -c $(DEBUG)
 LFLAGS = -Wall $(DEBUG)
 
 vpath %.cpp $(SRC)

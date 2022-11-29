@@ -1,13 +1,8 @@
 
 #include "cpu.h"
 #include "timer.h"
-#include "sched.h"
+#include "scheduler.h"
 #include "loader.h"
-
-#include <pthread.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 
 #define MLQ_SCHED
 static int time_slot;

@@ -3,9 +3,16 @@
 
 /* Define structs and routine could be used by every source files */
 
-#include <stdint.h>
+#include <cstdint>
 #include <vector>
 #include <memory>
+#include <queue>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <fstream>
+#include <pthread.h>
+#include <mutex>
 
 #define ADDRESS_SIZE    20
 #define OFFSET_LEN    10
@@ -71,7 +78,7 @@ struct pcb_t {
     uint32_t pid;    // PID
     uint32_t priority; /* Task with higher priority runs first */
     code_seg_t code;    // Code segment
-    addr_t regs[10]; // Registers, store address of allocated regions
+    addr_t regs[10]{}; // Registers, store address of allocated regions
     uint32_t pc{}; // Program pointer, point to the next instruction
     page_table_t seg_table; // Page table
     uint32_t bp{PAGE_SIZE};    // Break pointer
