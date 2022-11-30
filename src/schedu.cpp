@@ -12,7 +12,7 @@ bool mlq_scheduler_t::is_empty() {
 void mlq_scheduler_t::add_proc(const std::shared_ptr<pcb_t> &proc) {
     std::unique_lock lock(m_Lock);
     /* O(log n) */
-    m_q_Ready[proc->priority].enqueue(proc);
+    m_q_Ready[MAX_PRIO - proc->prio].enqueue(proc);
 #ifdef OPTIMIZED_SCH
     m_q_Access.push(proc->prio);
 #endif
@@ -53,9 +53,9 @@ std::shared_ptr<pcb_t> mlq_scheduler_t::get_proc() {
         uint32_t prioritized_next_level = m_q_Access.top();
         /* O(log n) : n is the number of processes */
         m_q_Access.pop();
-        if (!m_q_Ready[prioritized_next_level].empty()) {
+        if (!m_q_Ready[MAX_PRIO - prioritized_next_level].empty()) {
             /* O(log n) : n is the size of this level queue */
-            return m_q_Ready[prioritized_next_level].dequeue();
+            return m_q_Ready[MAX_PRIO - prioritized_next_level].dequeue();
         }
     }
 #else
