@@ -1,6 +1,6 @@
 #include "queue.h"
 
-void queue_t::enqueue(const std::shared_ptr<pcb_t>& proc) {
+void queue_t::enqueue(std::shared_ptr<pcb_t> proc) {
     /* Enqueue new process */
     if (q.size() == MAX_QUEUE_SIZE) {
         perror("Queue overflow while enqueue-ing\n");

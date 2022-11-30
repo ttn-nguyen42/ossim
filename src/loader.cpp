@@ -36,8 +36,8 @@ std::shared_ptr<pcb_t> load(const char *path) {
     std::string opcode;
     int code_size, priority = 0;
     descriptor >> priority >> code_size;
-    avail_pid += 1;
     std::shared_ptr<pcb_t> proc = std::make_shared<pcb_t>(avail_pid, priority, code_size);
+    avail_pid += 1;
     for (inst_t &it: proc->code.text) {
         descriptor >> opcode;
         it.opcode = get_opcode(opcode);
@@ -51,7 +51,6 @@ std::shared_ptr<pcb_t> load(const char *path) {
                 descriptor >> it.arg_0;
                 break;
             case READ:
-                break;
             case WRITE:
                 descriptor >> it.arg_0 >> it.arg_1 >> it.arg_2;
                 break;

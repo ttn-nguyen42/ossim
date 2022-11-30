@@ -25,19 +25,19 @@ struct cpu_args {
     int id;
 };
 
-static void *cpu_routine(void *args) {
-    struct timer_id_t *timer_id = ((struct cpu_args *) args)->timer_id;
-    int id = ((struct cpu_args *) args)->id;
+static void cpu_routine(timer_id_t* timer_id, int id) {
+    // struct timer_id_t *timer_id = ((struct cpu_args *) args)->timer_id;
+    // int id = ((struct cpu_args *) args)->id;
     /* Check for new process in ready queue */
     int time_left = 0;
-    std::shared_ptr<pcb_t> proc = nullptr;
+    std::shared_ptr<pcb_t> proc;
     while (true) {
         /* Check the status of current process */
-        if (proc == nullptr) {
+        if (!proc) {
             /* No process is running, then we load new process from
              * ready queue */
             proc = g_Scheduler.get_proc();
-            if (proc == nullptr) {
+            if (!proc) {
                 next_slot(timer_id);
                 continue; /* First load failed. skip dummy load */
             }
@@ -56,11 +56,11 @@ static void *cpu_routine(void *args) {
         }
 
         /* Recheck process status after loading new process */
-        if (proc == nullptr && done) {
+        if (!proc && done) {
             /* No process to run, exit */
             printf("\tCPU %d stopped\n", id);
             break;
-        } else if (proc == nullptr) {
+        } else if (!proc) {
             /* There may be new processes to run in
              * next time slots, just skip current slot */
             next_slot(timer_id);
@@ -80,8 +80,8 @@ static void *cpu_routine(void *args) {
     pthread_exit(nullptr);
 }
 
-static void *ld_routine(void *args) {
-    auto *timer_id = (struct timer_id_t *) args;
+static void ld_routine(timer_id_t* timer_id) {
+    // auto *timer_id = (struct timer_id_t *) args;
     int i = 0;
     while (i < num_processes) {
         std::shared_ptr<pcb_t> proc = load(ld_processes.path[i]);
@@ -144,32 +144,33 @@ int main(int argc, char *argv[]) {
     strcat(path, argv[1]);
     read_config(path);
 
-    auto *cpu = (pthread_t *) malloc(num_cpus * sizeof(pthread_t));
-    auto *args =
-        (struct cpu_args *) malloc(sizeof(struct cpu_args) * num_cpus);
-    pthread_t ld;
+    /* Memory leaks here */
+    // auto *cpu = (pthread_t *) malloc(num_cpus * sizeof(pthread_t));
+    // auto *args = (struct cpu_args *) malloc(sizeof(struct cpu_args) * num_cpus);
+    // pthread_t ld;
+    std::vector<std::thread> cpu;
+    std::vector<timer_id_t*> args;
+    std::thread ld;
 
     /* Init timer */
     int i;
     for (i = 0; i < num_cpus; i++) {
-        args[i].timer_id = attach_event();
-        args[i].id = i;
+        args.push_back(attach_event());
     }
     struct timer_id_t *ld_event = attach_event();
     start_timer();
 
     /* Run CPU and loader */
-    pthread_create(&ld, nullptr, ld_routine, (void *) ld_event);
+    ld = std::thread(ld_routine, ld_event);
     for (i = 0; i < num_cpus; i++) {
-        pthread_create(&cpu[i], nullptr,
-                       cpu_routine, (void *) &args[i]);
+        cpu.emplace_back(cpu_routine, args.at(i), i);
     }
 
     /* Wait for CPU and loader finishing */
     for (i = 0; i < num_cpus; i++) {
-        pthread_join(cpu[i], nullptr);
+        cpu.at(i).join();
     }
-    pthread_join(ld, nullptr);
+    ld.join();
 
     /* Stop timer */
     stop_timer();

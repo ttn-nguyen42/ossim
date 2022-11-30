@@ -24,7 +24,7 @@ private:
     std::priority_queue<std::shared_ptr<pcb_t>, std::vector<std::shared_ptr<pcb_t>>, pcb_comparator> q;
 public:
     /* Add new process to queue */
-    void enqueue(const std::shared_ptr<pcb_t>& proc);
+    void enqueue(std::shared_ptr<pcb_t> proc);
 
     /* Dequeue the top priority process */
     std::shared_ptr<pcb_t> dequeue();

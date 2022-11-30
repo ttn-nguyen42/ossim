@@ -12,7 +12,7 @@ bool mlq_scheduler_t::is_empty() {
 void mlq_scheduler_t::add_proc(const std::shared_ptr<pcb_t> &proc) {
     std::unique_lock lock(m_Lock);
     /* O(log n) */
-    m_q_Ready[MAX_PRIO - proc->prio].enqueue(proc);
+    m_q_Ready[(MAX_PRIO - 1) - proc->prio].enqueue(proc);
 #ifdef OPTIMIZED_SCH
     m_q_Access.push(proc->prio);
 #endif

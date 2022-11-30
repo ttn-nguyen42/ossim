@@ -13,6 +13,7 @@
 #include <fstream>
 #include <pthread.h>
 #include <mutex>
+#include <bits/stdc++.h>
 
 #define ADDRESS_SIZE    20
 #define OFFSET_LEN    10
@@ -58,18 +59,20 @@ struct trans_table_entry_t {
 struct trans_table_t {
     /* A row in the page table of the second layer */
     std::vector<trans_table_entry_t> table;
+
     trans_table_t() : table(1 << SECOND_LV_LEN) {}
 };
 
 /* Mapping virtual addresses and physical ones */
 struct page_table_entry_t {
     addr_t v_index{};    // Virtual index
-    std::shared_ptr<trans_table_t> next_lv{};
+    std::shared_ptr<trans_table_t> pages{};
 };
 
 struct page_table_t {
     /* Translation table for the first layer */
     std::vector<page_table_entry_t> table;
+
     page_table_t() : table(1 << FIRST_LV_LEN) {}
 };
 
@@ -85,7 +88,7 @@ struct pcb_t {
     uint32_t prio{};
 
     /* Constructor for initialization */
-    pcb_t(uint32_t pid, uint32_t priority, int code_size): code(code_size) {
+    pcb_t(uint32_t pid, uint32_t priority, int code_size) : code(code_size) {
         this->pid = pid;
         this->priority = priority;
     }
