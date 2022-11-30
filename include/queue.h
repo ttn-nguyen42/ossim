@@ -17,6 +17,10 @@ public:
 
 class queue_t {
 private:
+    /* Priority queue is based on a max_heap */
+    /*
+     * HOW THAT WORK: https://he-s3.s3.amazonaws.com/media/uploads/31ddacf.jpg
+     */
     std::priority_queue<std::shared_ptr<pcb_t>, std::vector<std::shared_ptr<pcb_t>>, pcb_comparator> q;
 public:
     /* Add new process to queue */
