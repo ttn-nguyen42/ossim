@@ -4,12 +4,15 @@
 #include "schedu.h"
 #include "loader.h"
 
-#define MLQ_SCHED
 static int time_slot;
 static int num_cpus;
 static int done = 0;
 
+#ifdef MLQ_SCHED
 static mlq_scheduler_t g_Scheduler;
+#else
+static scheduler_t g_Scheduler;
+#endif
 
 static struct ld_args {
     char **path;
@@ -51,7 +54,11 @@ static void cpu_routine(timer_id_t* timer_id, int id) {
             /* The process has done its job in current time slot */
             printf("\tCPU %d: Put process %2d to run queue\n",
                    id, proc->pid);
+#ifdef MLQ_SCHED
             g_Scheduler.add_proc(proc);
+#else
+            g_Scheduler.put_proc(proc);
+#endif
             proc = g_Scheduler.get_proc();
         }
 
@@ -85,12 +92,19 @@ static void ld_routine(timer_id_t* timer_id) {
     int i = 0;
     while (i < num_processes) {
         std::shared_ptr<pcb_t> proc = load(ld_processes.path[i]);
+#ifdef MLQ_SCHED
         proc->prio = ld_processes.prio[i];
+#endif
         while (current_time() < ld_processes.start_time[i]) {
             next_slot(timer_id);
         }
+#ifdef MLQ_SCHED
         printf("\tLoaded a process at %s, PID: %d PRIO: %ld\n",
                ld_processes.path[i], proc->pid, ld_processes.prio[i]);
+#else
+        printf("\tLoaded a process at %s, PID: %d\n",
+               ld_processes.path[i], proc->pid);
+#endif
         g_Scheduler.add_proc(proc);
         free(ld_processes.path[i]);
         i++;

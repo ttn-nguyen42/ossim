@@ -1,14 +1,6 @@
 #include "schedu.h"
 
-bool mlq_scheduler_t::is_empty() {
-    for (int i = 0; i < MAX_PRIO; i += 1) {
-        if (!m_q_Ready[i].empty()) {
-            return false;
-        }
-    }
-    return true;
-}
-
+#ifdef MLQ_SCHED
 void mlq_scheduler_t::add_proc(const std::shared_ptr<pcb_t> &proc) {
     std::unique_lock lock(m_Lock);
     /* O(log n) */
@@ -67,4 +59,27 @@ std::shared_ptr<pcb_t> mlq_scheduler_t::get_proc() {
 #endif
     return nullptr;
 }
+#else
 
+std::shared_ptr<pcb_t> scheduler_t::get_proc() {
+    std::unique_lock<std::mutex> lock(m_Lock);
+    if (m_q_Ready.empty()) {
+        if (m_q_Run.empty()) {
+            return nullptr;
+        }
+        std::swap(m_q_Run, m_q_Ready);
+    }
+    return m_q_Ready.dequeue();
+}
+
+void scheduler_t::add_proc(const std::shared_ptr<pcb_t> &proc) {
+    std::unique_lock<std::mutex> lock(m_Lock);
+    m_q_Ready.enqueue(proc);
+}
+
+void scheduler_t::put_proc(const std::shared_ptr<pcb_t> &proc) {
+    std::unique_lock<std::mutex> lock(m_Lock);
+    m_q_Run.enqueue(proc);
+}
+
+#endif
