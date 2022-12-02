@@ -9,8 +9,9 @@ addr_t memory_t::alloc_mem(uint32_t size, pcb_t *proc) {
      * byte in the allocated memory region to [ret_mem].
      */
 
-    uint32_t num_pages = (size % PAGE_SIZE) ? size / PAGE_SIZE :
-                         size / PAGE_SIZE + 1; // Number of pages we will use
+    //uint32_t num_pages = (size % PAGE_SIZE) ? size / PAGE_SIZE :
+    //                     size / PAGE_SIZE + 1; // Number of pages we will use
+    uint32_t num_pages = (size + PAGE_SIZE - 1) / PAGE_SIZE;
     int mem_avail = 0; // We could allocate new memory region or not?
 
     /* First we must check if the amount of free memory in
@@ -24,7 +25,7 @@ addr_t memory_t::alloc_mem(uint32_t size, pcb_t *proc) {
      */
     {
         uint32_t available_pages = 0;
-        for (int i; i < NUM_PAGES; i += 1) {
+        for (int i = 0; i < NUM_PAGES; i += 1) {
             if (_mem_stat[i].proc <= 0) {
                 /* Not allocated */
                 available_pages += 1;
@@ -58,7 +59,7 @@ addr_t memory_t::alloc_mem(uint32_t size, pcb_t *proc) {
          * 	  valid. */
         for (long phys_index = 0,
                  page_index = 0,
-                 prev_index = -1; phys_index < NUM_PAGES; phys_index += 1) {
+                 prev_index = -1;; phys_index += 1) {
             if (_mem_stat[phys_index].proc > 0) {
                 /* Allocated, skip */
                 continue;
@@ -67,6 +68,7 @@ addr_t memory_t::alloc_mem(uint32_t size, pcb_t *proc) {
             /* Update the segment table */
             /* Calculate the virtual address */
             addr_t v_addr = ret_mem + (page_index * PAGE_SIZE);
+            // printf("Virtual address: %d\n", v_addr);
 
             addr_t first_level_index = get_first_lv(v_addr);
             addr_t second_level_index = get_second_lv(v_addr);
@@ -79,11 +81,10 @@ addr_t memory_t::alloc_mem(uint32_t size, pcb_t *proc) {
             }
 
             /* Update the level 2 segment */
-            auto &second_level_entry = first_level_entry.pages->table.at(second_level_index);
-            if (second_level_entry.v_index == 0) {
-                second_level_entry.v_index = 1;
-                second_level_entry.p_index = (addr_t) phys_index;
-            }
+            auto &second_level_entry = first_level_entry.pages->table[second_level_index];
+            second_level_entry.v_index = 1;
+            second_level_entry.p_index = (addr_t) phys_index;
+            first_level_entry.pages->size += 1;
 
             /* Update the memory status */
             if (prev_index >= 0) {
@@ -136,10 +137,10 @@ int memory_t::free_mem(addr_t address, pcb_t *proc) {
         /* Clean second level */
         auto &trans_table = proc->seg_table.table[first_level_index].pages;
         trans_table->table[second_level_index].v_index = 0;
-        trans_table->table.pop_back();
+        trans_table->size -= 1;
 
         /* Clean first level */
-        if (trans_table->table.empty()) {
+        if (trans_table->size == 0) {
             auto &page_table = proc->seg_table.table;
             page_table[first_level_index].pages.reset();
             page_table[first_level_index].v_index = 0;
@@ -149,8 +150,6 @@ int memory_t::free_mem(addr_t address, pcb_t *proc) {
         _mem_stat[physical_index].proc = 0;
         physical_index = _mem_stat[physical_index].next;
     }
-
-
     return 0;
 }
 
@@ -166,6 +165,8 @@ int memory_t::read_mem(addr_t address, pcb_t *proc, BYTE *data) {
 
 int memory_t::write_mem(addr_t address, pcb_t *proc, BYTE data) {
     addr_t physical_addr = translate(address, proc);
+    // printf("At: %d\n", physical_addr);
+    // printf("Data -> memory: %d\n", data);
     if (physical_addr != INT32_MAX) {
         _ram[physical_addr] = data;
         return 0;
@@ -180,6 +181,13 @@ void memory_t::dump() {
         if (_mem_stat[i].proc != 0) {
             printf("%03d: ", i);
             printf("%05x-%05x - PID: %02d (idx %03d, nxt: %03ld)\n",
+                   /*
+                    * i = 0
+                    * Shift left 10 -> 0000 0000 0000 0000
+                    *
+                    * i = 1
+                    * Shift left 10 -> 0000 0100 0000 0000
+                    */
                    i << OFFSET_LEN,
                    ((i + 1) << OFFSET_LEN) - 1,
                    _mem_stat[i].proc,
@@ -249,11 +257,25 @@ addr_t memory_t::translate(addr_t virtual_addr, pcb_t *proc) {
 
     /* The second layer index */
     addr_t second_lv = get_second_lv(virtual_addr);
+    /*
+     * Example: 13535
+     * 00000|01101|0011011111
+     *
+     */
+    /*std::bitset<20> virtual_addr_bits(virtual_addr);
+    std::bitset<10> offset_bits(offset);
+    std::bitset<5> first_lv_bits(first_lv);
+    std::bitset<5> second_lv_bits(second_lv);
+
+    std::cout << "Virtual address: " << virtual_addr_bits << "     " << virtual_addr << std::endl;
+    std::cout << "Offset bits:               " << offset_bits << "     " << offset << std::endl;
+    std::cout << "First level:     " << first_lv_bits << "                    " << first_lv << std::endl;
+    std::cout << "Second level:         " << second_lv_bits << "               " << second_lv << std::endl;*/
 
     /* Search in the first level */
     std::shared_ptr<trans_table_t> trans_table = proc->seg_table.table[first_lv].pages;
-    if (proc->seg_table.table[first_lv].v_index != 0) {
-        if (trans_table->table[second_lv].v_index != 0) {
+    if (proc->seg_table.table[first_lv].v_index) {
+        if (trans_table->table[second_lv].v_index) {
             /* Concatenate the offset of the virtual addess
              * to [p_index] field of trans_table->table
              */

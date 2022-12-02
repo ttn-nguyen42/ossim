@@ -15,7 +15,8 @@
 #include <mutex>
 #include <bits/stdc++.h>
 
-// #define MLQ_SCHED
+#define MLQ_SCHED
+#define OPTIMIZED_SCH
 
 #define ADDRESS_SIZE    20
 #define OFFSET_LEN    10
@@ -60,9 +61,8 @@ struct trans_table_entry_t {
 
 struct trans_table_t {
     /* A row in the page table of the second layer */
-    std::vector<trans_table_entry_t> table;
-
-    trans_table_t() : table(1 << SECOND_LV_LEN) {}
+    trans_table_entry_t table[1 << SECOND_LV_LEN];
+    int size;
 };
 
 /* Mapping virtual addresses and physical ones */

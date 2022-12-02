@@ -38,7 +38,7 @@ os: $(OS_OBJ)
 
 test_all: test_mem test_sched test_os_mlq
 
-test_mem:
+test_mem: mem
 	@echo ------ MEMORY MANAGEMENT TEST 0 ------------------------------------
 	./mem input/proc/m0
 	@echo NOTE: Read file output/m0 to verify your result
@@ -46,7 +46,7 @@ test_mem:
 	./mem input/proc/m1
 	@echo 'NOTE: Read file output/m1 to verify your result (your implementation should print nothing)'
 
-test_sched:
+test_sched: sched
 	@echo ------ SCHEDULING TEST 0 -------------------------------------------
 	./os sched_0
 	@echo NOTE: Read file output/sched_0 to verify your result
@@ -54,7 +54,7 @@ test_sched:
 	./os sched_1
 	@echo NOTE: Read file output/sched_1 to verify your result
 	
-test_os:
+test_os: os
 	@echo ----- OS TEST 0 ----------------------------------------------------
 	./os os_0
 	@echo NOTE: Read file output/os_0 to verify your result
@@ -62,7 +62,7 @@ test_os:
 	./os os_1
 	@echo NOTE: Read file output/os_1 to verify your result
 
-test_os_mlq:
+test_os_mlq: os sched
 	@echo ----- OS TEST 0 ----------------------------------------------------
 	./os os_mlq_0
 	@echo NOTE: Read file output/os_0 to verify your result

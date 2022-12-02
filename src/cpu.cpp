@@ -58,18 +58,23 @@ int run(struct pcb_t *proc) {
     int stat = 1;
     switch (ins.opcode) {
         case CALC:
+//            printf("calc\n");
             stat = calc(proc);
             break;
         case ALLOC:
+//            printf("alloc %d %d\n", ins.arg_0, ins.arg_1);
             stat = alloc(proc, ins.arg_0, ins.arg_1);
             break;
         case FREE:
+//            printf("free %d\n", ins.arg_0);
             stat = free_data(proc, ins.arg_0);
             break;
         case READ:
+//            printf("read %d %d %d\n", ins.arg_0, ins.arg_1, ins.arg_2);
             stat = read(proc, ins.arg_0, ins.arg_1, ins.arg_2);
             break;
         case WRITE:
+//            printf("write %d %d %d\n", ins.arg_0, ins.arg_1, ins.arg_2);
             stat = write(proc, ins.arg_0, ins.arg_1, ins.arg_2);
             break;
         default:

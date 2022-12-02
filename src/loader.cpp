@@ -51,6 +51,8 @@ std::shared_ptr<pcb_t> load(const char *path) {
                 descriptor >> it.arg_0;
                 break;
             case READ:
+                descriptor >> it.arg_0 >> it.arg_1 >> it.arg_2;
+                break;
             case WRITE:
                 descriptor >> it.arg_0 >> it.arg_1 >> it.arg_2;
                 break;
