@@ -9,8 +9,8 @@ addr_t memory_t::alloc_mem(uint32_t size, pcb_t *proc) {
      * byte in the allocated memory region to [ret_mem].
      */
 
-    //uint32_t num_pages = (size % PAGE_SIZE) ? size / PAGE_SIZE :
-    //                     size / PAGE_SIZE + 1; // Number of pages we will use
+//    uint32_t num_pages = (size % PAGE_SIZE) ? size / PAGE_SIZE :
+//                         size / PAGE_SIZE + 1; // Number of pages we will use
     uint32_t num_pages = (size + PAGE_SIZE - 1) / PAGE_SIZE;
     int mem_avail = 0; // We could allocate new memory region or not?
 
@@ -23,29 +23,29 @@ addr_t memory_t::alloc_mem(uint32_t size, pcb_t *proc) {
      * to know whether this page has been used by a process.
      * For virtual memory space, check bp (break pointer).
      */
-    {
-        uint32_t available_pages = 0;
-        for (int i = 0; i < NUM_PAGES; i += 1) {
-            if (_mem_stat[i].proc <= 0) {
-                /* Not allocated */
-                available_pages += 1;
-            }
-            if (available_pages >= num_pages) {
-                break;
-            }
+
+    uint32_t available_pages = 0;
+    for (int i = 0; i < NUM_PAGES; i += 1) {
+        if (_mem_stat[i].proc <= 0) {
+            /* Not allocated */
+            available_pages += 1;
         }
-        /* Check if new memory region can be allocated
-         *
-         * On the physical address space, the number of pages must not be less than number of available pages
-         * As for virtual address space, the size span from the breakpoint to its final segment must be less than the maximum address possible
-         * (not more than 20 bits)
-         */
         if (available_pages >= num_pages) {
-            if (proc->bp + (num_pages * PAGE_SIZE) <= RAM_SIZE) {
-                mem_avail = 1;
-            }
+            break;
         }
     }
+    /* Check if new memory region can be allocated
+     *
+     * On the physical address space, the number of pages must not be less than number of available pages
+     * As for virtual address space, the size span from the breakpoint to its final segment must be less than the maximum address possible
+     * (not more than 20 bits)
+     */
+    if (available_pages >= num_pages) {
+        if (proc->bp + (num_pages * PAGE_SIZE) <= RAM_SIZE) {
+            mem_avail = 1;
+        }
+    }
+
 
     if (mem_avail) {
         /* We could allocate new memory region to the process */
@@ -180,14 +180,15 @@ void memory_t::dump() {
     for (i = 0; i < NUM_PAGES; i++) {
         if (_mem_stat[i].proc != 0) {
             printf("%03d: ", i);
-            printf("%05x-%05x - PID: %02d (idx %03d, nxt: %03ld)\n",
-                   /*
-                    * i = 0
-                    * Shift left 10 -> 0000 0000 0000 0000
-                    *
-                    * i = 1
-                    * Shift left 10 -> 0000 0100 0000 0000
-                    */
+            // printf("%05x-%05x - PID: %02d (idx %03d, nxt: %03ld)\n",
+            printf("%d-%d - PID: %02d (idx %03d, nxt: %03ld)\n",
+                /*
+                 * i = 0
+                 * Shift left 10 -> 0000 0000 0000 0000
+                 *
+                 * i = 1
+                 * Shift left 10 -> 0000 0100 0000 0000
+                 */
                    i << OFFSET_LEN,
                    ((i + 1) << OFFSET_LEN) - 1,
                    _mem_stat[i].proc,
@@ -200,7 +201,7 @@ void memory_t::dump() {
                  j++) {
 
                 if (_ram[j] != 0) {
-                    printf("\t%05x: %02x\n", j, _ram[j]);
+                    printf("\t%05x: %d\n", j, _ram[j]);
                 }
 
             }
