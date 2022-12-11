@@ -45,9 +45,9 @@ std::shared_ptr<pcb_t> mlq_scheduler_t::get_proc() {
         uint32_t prioritized_next_level = m_q_Access.top();
         /* O(log n) : n is the number of processes */
         m_q_Access.pop();
-        if (!m_q_Ready[MAX_PRIO - prioritized_next_level].empty()) {
+        if (!m_q_Ready[(MAX_PRIO - 1) - prioritized_next_level].empty()) {
             /* O(log n) : n is the size of this level queue */
-            return m_q_Ready[MAX_PRIO - prioritized_next_level].dequeue();
+            return m_q_Ready[(MAX_PRIO - 1) - prioritized_next_level].dequeue();
         }
     }
 #else

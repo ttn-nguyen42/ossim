@@ -3,8 +3,6 @@
 #ifndef SCHEDULER_H
 #define SCHEDULER_H
 
-// #define OPTIMIZED_SCH
-
 #include "queue.h"
 
 #define MAX_PRIO 512
